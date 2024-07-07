@@ -1,5 +1,5 @@
 <?php
-// // Include your connection function or establish connection here
+// Include your connection function or establish connection here
 include 'connections/connect.php';
 $conn = connection(); // Assuming connection() function returns the mysqli connection
 
@@ -10,14 +10,13 @@ if (!isset($_SESSION['email'])) {
     exit();
 }
 
-
 // Default values for date selection (can be set dynamically based on admin input)
 $from_date = isset($_GET['from_date']) ? $_GET['from_date'] : date('Y-m-d');
 $to_date = isset($_GET['to_date']) ? $_GET['to_date'] : date('Y-m-d');
 
 // Ensure that $to_date does not exceed today's date
 $today_date = date('Y-m-d');
-if ($to_date > $today_date) {
+if (strtotime($to_date) > strtotime($today_date)) {
     $to_date = $today_date; // Set $to_date to today's date if it exceeds
 }
 
@@ -39,8 +38,6 @@ if ($result->num_rows > 0) {
 // Query to fetch data for DataTable
 $sql_table = "SELECT logID, email, Date, Time, purpose FROM informationlogtbl WHERE Date BETWEEN '$from_date' AND '$to_date'";
 $result_table = $conn->query($sql_table);
-$sql_visitor = "SELECT email, firstname, middlename, lastname, city, province, gender, school_insti, category FROM visitortbl";
-$result_visitor = $conn->query($sql_visitor);
 
 // Initialize $data array to store table rows
 $data = [];
@@ -48,7 +45,14 @@ if ($result_table->num_rows > 0) {
     while ($row = $result_table->fetch_assoc()) {
         $data[] = $row; // Store each row in $data array
     }
+} else {
+    echo "No logs found for the selected date range.";
 }
+
+// Query to fetch visitor data
+$sql_visitor = "SELECT email, firstname, middlename, lastname, city, province, gender, school_insti, category FROM visitortbl";
+$result_visitor = $conn->query($sql_visitor);
+
 // Initialize $visitorChart array to store table rows
 $visitorChart = [];
 if ($result_visitor->num_rows > 0) {
@@ -56,62 +60,33 @@ if ($result_visitor->num_rows > 0) {
         $visitorChart[] = $row; // Store each row in $visitorChart array
     }
 }
-// Assuming $from_date and $to_date are properly defined
-$sql_logs = "SELECT il.Date, COUNT(DISTINCT vt.email) as Count, vt.gender 
-             FROM informationlogtbl il 
-             INNER JOIN visitortbl vt ON il.email = vt.email 
-             WHERE il.Date BETWEEN '$from_date' AND '$to_date' 
-             GROUP BY il.Date, vt.gender";
-$result_logs = $conn->query($sql_logs);
 
-// Process the results
-$gender_counts = [];
-while ($row = $result_logs->fetch_assoc()) {
-    $date = $row['Date'];
-    $gender = $row['gender'];
-    $count = $row['Count'];
+// Query to fetch peak hour data for today
+$sql_peak_hour = "SELECT Time, COUNT(*) as Count FROM informationlogtbl WHERE Date = '$today_date' GROUP BY Time ORDER BY Count DESC LIMIT 1";
+$result_peak_hour = $conn->query($sql_peak_hour);
+$peak_hour_data = $result_peak_hour->fetch_assoc();
+$peak_hour = $peak_hour_data['Time'];
+$peak_hour_count = $peak_hour_data['Count'];
 
-    // Store or process the data as needed
-    // Example: Storing in an array for display or further processing
-    if (!isset($gender_counts[$date])) {
-        $gender_counts[$date] = [];
-    }
-    $gender_counts[$date][$gender] = $count;
-}
+// Query to get gender counts
+$sql_gender_count = "SELECT gender, COUNT(*) as Count FROM visitortbl GROUP BY gender";
+$result_gender_count = $conn->query($sql_gender_count);
 
-// Example output structure:
-// $gender_counts['2024-07-07']['Male'] = 2; // Assuming there are 2 male visitors
-// $gender_counts['2024-07-07']['Female'] = 0; // Assuming there are 0 female visitors
+// Initialize arrays to store gender counts
+$gender_labels = ['Male', 'Female', 'Prefer not to say'];
+$gender_counts = [0, 0, 0];
 
-
-
-// Initialize arrays to store data for chart and table
-$chart_labels = [];
-$male_counts = [];
-$female_counts = [];
-
-if ($result_logs->num_rows > 0) {
-    while ($row = $result_logs->fetch_assoc()) {
-        $chart_labels[$row['Date']] = $row['Date']; // Assuming Date field for X-axis labels
+if ($result_gender_count->num_rows > 0) {
+    while ($row = $result_gender_count->fetch_assoc()) {
         if ($row['gender'] == 'Male') {
-            $male_counts[$row['Date']] = $row['Count']; // Male visitor counts per Date
-        } else {
-            $female_counts[$row['Date']] = $row['Count']; // Female visitor counts per Date
+            $gender_counts[0] = $row['Count'];
+        } elseif ($row['gender'] == 'Female') {
+            $gender_counts[1] = $row['Count'];
+        } elseif ($row['gender'] == 'Prefer not to say') {
+            $gender_counts[2] = $row['Count'];
         }
     }
 }
-
-// Calculate total counts
-$total_male_logs = array_sum($male_counts);
-$total_female_logs = array_sum($female_counts);
-
-// Calculate total logs (optional, if needed for other purposes)
-$total_logs = $total_male_logs + $total_female_logs;
-
-// Calculate percentages
-$percentage_male_logs = ($total_logs > 0) ? round(($total_male_logs / $total_logs) * 100, 2) : 0;
-$percentage_female_logs = ($total_logs > 0) ? round(($total_female_logs / $total_logs) * 100, 2) : 0;
-
 
 $conn->close(); // Close the database connection
 ?>
@@ -254,15 +229,17 @@ $conn->close(); // Close the database connection
                             <canvas id="myAreaChart" width="100%" height="40"></canvas>
                         </div>
                         </div>
-                            <div class="col-xl-6">
-                                <div class="card mb-4">
-                                    <div class="card-header">
-                                        <i class="fas fa-chart-bar me-1"></i>
-                                        Bar Chart Example
-                                    </div>
-                                    <div class="card-body"><canvas id="myBarChart" width="100%" height="40"></canvas></div>
+                        <div class="col-xl-6">
+                            <div class="card mb-4">
+                                <div class="card-header">
+                                    <i class="fas fa-chart-bar me-1"></i>
+                                    Gender Count Bar Chart
+                                </div>
+                                <div class="card-body">
+                                    <canvas id="genderBarChart" width="100%" height="40"></canvas>
                                 </div>
                             </div>
+                        </div>
                             <div class="col-xl-6">
                                 <div class="card mb-4">
                                     <div class="card-header">
@@ -311,27 +288,6 @@ $conn->close(); // Close the database connection
         </table>
     </div>
 </div>
-<div class="card mb-4">
-    <div class="card-header">
-        <i class="fas fa-table me-1"></i>
-        Visitor Statistics from Information Log (<?php echo $from_date; ?> to <?php echo $to_date; ?>)
-    </div>
-    <div class="card-body">
-        <div class="row">
-            <div class="col-md-6">
-                <h5>Total Logs</h5>
-                <p>Total Male Logs: <?php echo $total_male_logs; ?></p>
-                <p>Total Female Logs: <?php echo $total_female_logs; ?></p>
-            </div>
-            <div class="col-md-6">
-                <h5>Percentage Distribution</h5>
-                <p>Male: <?php echo $percentage_male_logs; ?>%</p>
-                <p>Female: <?php echo $percentage_female_logs; ?>%</p>
-            </div>
-        </div>
-    </div>
-</div>
-
 
 
 
@@ -403,5 +359,40 @@ $conn->close(); // Close the database connection
 
         <script src="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/umd/simple-datatables.min.js" crossorigin="anonymous"></script>
         <script src="js/datatables-simple-demo.js"></script>
+
+        <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        var ctx = document.getElementById("genderBarChart").getContext("2d");
+        var genderBarChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: <?php echo json_encode($gender_labels); ?>,
+                datasets: [{
+                    label: 'Gender Count',
+                    data: <?php echo json_encode($gender_counts); ?>,
+                    backgroundColor: [
+                        'rgba(54, 162, 235, 0.2)', // Male
+                        'rgba(255, 99, 132, 0.2)', // Female
+                        'rgba(75, 192, 192, 0.2)'  // Prefer not to say
+                    ],
+                    borderColor: [
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(75, 192, 192, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    });
+</script>
+
     </body>
 </html>
