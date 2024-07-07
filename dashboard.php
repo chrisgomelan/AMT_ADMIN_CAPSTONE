@@ -56,6 +56,63 @@ if ($result_visitor->num_rows > 0) {
         $visitorChart[] = $row; // Store each row in $visitorChart array
     }
 }
+// Assuming $from_date and $to_date are properly defined
+$sql_logs = "SELECT il.Date, COUNT(DISTINCT vt.email) as Count, vt.gender 
+             FROM informationlogtbl il 
+             INNER JOIN visitortbl vt ON il.email = vt.email 
+             WHERE il.Date BETWEEN '$from_date' AND '$to_date' 
+             GROUP BY il.Date, vt.gender";
+$result_logs = $conn->query($sql_logs);
+
+// Process the results
+$gender_counts = [];
+while ($row = $result_logs->fetch_assoc()) {
+    $date = $row['Date'];
+    $gender = $row['gender'];
+    $count = $row['Count'];
+
+    // Store or process the data as needed
+    // Example: Storing in an array for display or further processing
+    if (!isset($gender_counts[$date])) {
+        $gender_counts[$date] = [];
+    }
+    $gender_counts[$date][$gender] = $count;
+}
+
+// Example output structure:
+// $gender_counts['2024-07-07']['Male'] = 2; // Assuming there are 2 male visitors
+// $gender_counts['2024-07-07']['Female'] = 0; // Assuming there are 0 female visitors
+
+
+
+// Initialize arrays to store data for chart and table
+$chart_labels = [];
+$male_counts = [];
+$female_counts = [];
+
+if ($result_logs->num_rows > 0) {
+    while ($row = $result_logs->fetch_assoc()) {
+        $chart_labels[$row['Date']] = $row['Date']; // Assuming Date field for X-axis labels
+        if ($row['gender'] == 'Male') {
+            $male_counts[$row['Date']] = $row['Count']; // Male visitor counts per Date
+        } else {
+            $female_counts[$row['Date']] = $row['Count']; // Female visitor counts per Date
+        }
+    }
+}
+
+// Calculate total counts
+$total_male_logs = array_sum($male_counts);
+$total_female_logs = array_sum($female_counts);
+
+// Calculate total logs (optional, if needed for other purposes)
+$total_logs = $total_male_logs + $total_female_logs;
+
+// Calculate percentages
+$percentage_male_logs = ($total_logs > 0) ? round(($total_male_logs / $total_logs) * 100, 2) : 0;
+$percentage_female_logs = ($total_logs > 0) ? round(($total_female_logs / $total_logs) * 100, 2) : 0;
+
+
 $conn->close(); // Close the database connection
 ?>
 
@@ -257,10 +314,34 @@ $conn->close(); // Close the database connection
 <div class="card mb-4">
     <div class="card-header">
         <i class="fas fa-table me-1"></i>
-        Visitor credentials
+        Visitor Statistics from Information Log (<?php echo $from_date; ?> to <?php echo $to_date; ?>)
     </div>
     <div class="card-body">
-        <table id="datatablesSimple" class="table table-bordered">
+        <div class="row">
+            <div class="col-md-6">
+                <h5>Total Logs</h5>
+                <p>Total Male Logs: <?php echo $total_male_logs; ?></p>
+                <p>Total Female Logs: <?php echo $total_female_logs; ?></p>
+            </div>
+            <div class="col-md-6">
+                <h5>Percentage Distribution</h5>
+                <p>Male: <?php echo $percentage_male_logs; ?>%</p>
+                <p>Female: <?php echo $percentage_female_logs; ?>%</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+<div class="card mb-4">
+    <div class="card-header">
+        <i class="fas fa-table me-1"></i>
+        Visitor credentials
+    </div>
+    <div class="card-body table-responsive">
+    <table id="datatablesSimple" class="table table-bordered">
             <thead>
                 <tr>
                     <th>Email</th>
