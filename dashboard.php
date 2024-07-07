@@ -39,6 +39,8 @@ if ($result->num_rows > 0) {
 // Query to fetch data for DataTable
 $sql_table = "SELECT logID, email, Date, Time, purpose FROM informationlogtbl WHERE Date BETWEEN '$from_date' AND '$to_date'";
 $result_table = $conn->query($sql_table);
+$sql_visitor = "SELECT email, firstname, middlename, lastname, city, province, gender, school_insti, category FROM visitortbl";
+$result_visitor = $conn->query($sql_visitor);
 
 // Initialize $data array to store table rows
 $data = [];
@@ -47,7 +49,13 @@ if ($result_table->num_rows > 0) {
         $data[] = $row; // Store each row in $data array
     }
 }
-
+// Initialize $visitorChart array to store table rows
+$visitorChart = [];
+if ($result_visitor->num_rows > 0) {
+    while ($row = $result_visitor->fetch_assoc()) {
+        $visitorChart[] = $row; // Store each row in $visitorChart array
+    }
+}
 $conn->close(); // Close the database connection
 ?>
 
@@ -63,14 +71,15 @@ $conn->close(); // Close the database connection
         <title>DOST-STII AMS ADMIN</title>
         <link href="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/style.min.css" rel="stylesheet" />
         <link href="css/styles.css" rel="stylesheet" />
+        <link rel="icon" href="assets/img/dost-stii_logo-white.png">
         <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
     </head>
     <body class="sb-nav-fixed">
         <nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark">
-            <!-- Navbar Brand-->
-            <a class="navbar-brand ps-3" href="index.php">DOST-STII LIBRARY ATTENDANCE MANAGEMENT SYSTEM ADMIN</a>
             <!-- Sidebar Toggle-->
             <button class="btn btn-link btn-sm order-1 order-lg-0 me-4 me-lg-0" id="sidebarToggle" href="#!"><i class="fas fa-bars"></i></button>
+            <!-- Navbar Brand-->
+            <a class="navbar-brand ps-3" href="index.php">DOST-STII LIBRARY ATTENDANCE MANAGEMENT SYSTEM ADMIN</a>
             <!-- Navbar Search-->
             <form class="d-none d-md-inline-block form-inline ms-auto me-0 me-md-3 my-2 my-md-0">
                 <div class="input-group">
@@ -168,7 +177,6 @@ $conn->close(); // Close the database connection
                         <ol class="breadcrumb mb-4">
                             <li class="breadcrumb-item active">Dashboard</li>
                         </ol>
-
                        <!-- Date Range Selection Form -->
                         <form method="GET" onsubmit="validateDateInputs();">
                             <label for="from_date">From Date:</label>
@@ -179,7 +187,6 @@ $conn->close(); // Close the database connection
 
                             <button type="submit">Generate Report</button>
                         </form>
-
                         <!-- Area Chart Example -->
                         <div class="card mb-4">
                         <div class="card-header">
@@ -199,7 +206,15 @@ $conn->close(); // Close the database connection
                                     <div class="card-body"><canvas id="myBarChart" width="100%" height="40"></canvas></div>
                                 </div>
                             </div>
-                        </div>
+                            <div class="col-xl-6">
+                                <div class="card mb-4">
+                                    <div class="card-header">
+                                        <i class="fas fa-chart-bar me-1"></i>
+                                        Peak Hour as of Today
+                                    </div>
+                                    <div class=""><canvas id="peakHour" width="100%" height="40"></canvas></div>
+                                </div>
+                            </div>
                         <div class="card mb-4">
     <div class="card-header">
         <i class="fas fa-table me-1"></i>
@@ -236,11 +251,47 @@ $conn->close(); // Close the database connection
                     </tr>
                 <?php endforeach; ?>
             </tbody>
-
         </table>
     </div>
 </div>
-
+<div class="card mb-4">
+    <div class="card-header">
+        <i class="fas fa-table me-1"></i>
+        Visitor credentials
+    </div>
+    <div class="card-body">
+        <table id="datatablesSimple" class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Email</th>
+                    <th>Name</th>
+                    <th>Middle Name</th>
+                    <th>Surname</th>
+                    <th>Gender</th>
+                    <th>Category</th>
+                    <th>School Institution</th>
+                    <th>Province</th>
+                    <th>City</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($visitorChart as $row): ?>
+                    <tr>
+                        <td><?php echo $row['email']; ?></td>
+                        <td><?php echo $row['firstname']; ?></td>
+                        <td><?php echo $row['middlename']; ?></td>
+                        <td><?php echo $row['lastname']; ?></td>
+                        <td><?php echo $row['gender']; ?></td>
+                        <td><?php echo $row['category']; ?></td>
+                        <td><?php echo $row['school_insti']; ?></td>
+                        <td><?php echo $row['province']; ?></td>
+                        <td><?php echo $row['city']; ?></td>
+                    </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+    </div>
+</div>
                 </main>
                 <footer class="py-4 bg-light mt-auto">
                     <div class="container-fluid px-4">

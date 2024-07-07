@@ -1,6 +1,6 @@
 @charset "UTF-8";
 /*!
-* Start Bootstrap - SB Admin v7.0.7 (https://startbootstrap.com/template/sb-admin)
+* Start Bootstrap - SB Adin v7.0.7 (https://startbootstrap.com/template/sb-admin)
 * Copyright 2013-2023 Start Bootstrap
 * Licensed under MIT (https://github.com/StartBootstrap/startbootstrap-sb-admin/blob/master/LICENSE)
 */
@@ -1456,6 +1456,10 @@ progress {
     width: 41.66666667%;
   }
   .col-xl-6 {
+    flex: 0 0 auto;
+    width: 50%;
+  }
+  .col-xl-6a {
     flex: 0 0 auto;
     width: 50%;
   }
