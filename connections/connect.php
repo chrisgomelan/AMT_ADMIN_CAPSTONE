@@ -2,14 +2,14 @@
 function connection() {
     $host = "localhost";
     $username = "root";
-    $password = "";
+    $password = ""; // Or your MySQL password
     $database = "dostlib_db";
 
-    $connect = new mysqli($host, $username, $password, $database);
-    if ($connect->connect_error) {
-        die("Connection failed: " . $connect->connect_error);
+    $mysqli = new mysqli($host, $username, $password, $database);
+    if ($mysqli->connect_error) {
+        die("Connection failed: " . $mysqli->connect_error);
     } else {
-        return $connect;
+        return $mysqli;
     }
 }
 ?>

@@ -1,5 +1,5 @@
 <?php
-// Include your connection function or establish connection here
+// // Include your connection function or establish connection here
 include 'connections/connect.php';
 $conn = connection(); // Assuming connection() function returns the mysqli connection
 
