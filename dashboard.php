@@ -79,7 +79,7 @@ $conn->close(); // Close the database connection
             <!-- Sidebar Toggle-->
             <button class="btn btn-link btn-sm order-1 order-lg-0 me-4 me-lg-0" id="sidebarToggle" href="#!"><i class="fas fa-bars"></i></button>
             <!-- Navbar Brand-->
-            <a class="navbar-brand ps-3" href="index.php">DOST-STII LIBRARY ATTENDANCE MANAGEMENT SYSTEM ADMIN</a>
+            <span class="navbar-brand ps-3 flexi">DOST-STII LIBRARY ATTENDANCE MANAGEMENT SYSTEM ADMIN</span>
             <!-- Navbar Search-->
             <form class="d-none d-md-inline-block form-inline ms-auto me-0 me-md-3 my-2 my-md-0">
                 <div class="input-group">
@@ -291,6 +291,7 @@ $conn->close(); // Close the database connection
             </tbody>
         </table>
     </div>
+</div>
 </div>
                 </main>
                 <footer class="py-4 bg-light mt-auto">

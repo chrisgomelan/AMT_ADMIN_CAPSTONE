@@ -10969,6 +10969,27 @@ body {
   width: 225px;
   margin: 0;
 }
+.flexi {
+  /* Adjust width based on your desired content length */
+  width: 100px;
+
+  /* Remove unnecessary width limitations */
+  max-width: none;
+  padding: 5px; /* Adjust padding as needed */
+  margin: 0; /* Adjust margin as needed */
+
+  /* Truncate only when necessary (use media queries for responsiveness) */
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* Optional: Responsive behavior using media queries (adjust breakpoints as needed) */
+@media (max-width: 768px) {
+  .flexi {
+    width: 1px; /* Adjust width for smaller screens */
+    overflow: hidden;
+  }
+}
 .sb-topnav.navbar-dark #sidebarToggle {
   color: rgba(255, 255, 255, 0.5);
 }
