@@ -3732,10 +3732,12 @@ textarea.form-control-lg {
   flex: 1 1 auto;
   text-align: center;
 }
-
+.dataTables_length{
+  margin-bottom: .5rem  ;
+}
 button#generatePDF {
   position: relative;
-  z-index: 10000;
+  z-index: 2;
 }
 
 .nav-justified > .nav-link,

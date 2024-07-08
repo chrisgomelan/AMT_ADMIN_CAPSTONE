@@ -45,9 +45,7 @@ if ($result_table->num_rows > 0) {
     while ($row = $result_table->fetch_assoc()) {
         $data[] = $row; // Store each row in $data array
     }
-} else {
-    echo "No logs found for the selected date range.";
-}
+} 
 
 // Query to fetch visitor data
 $sql_visitor = "SELECT email, firstname, middlename, lastname, city, province, gender, school_insti, category FROM visitortbl";
@@ -138,6 +136,8 @@ $conn->close(); // Close the database connection
         <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script type="text/javascript" charset="utf8" src="https://code.jquery.com/jquery-3.5.1.js"></script>
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.js"></script>
     </head>
     <body class="sb-nav-fixed">
 
@@ -251,7 +251,7 @@ $conn->close(); // Close the database connection
 
                 
                         
-                        <div class="card mb-4">
+    <div class="card mb-4">
     <div class="card-header">
         <i class="fas fa-table me-1"></i>
      Information Log 
@@ -299,9 +299,13 @@ $conn->close(); // Close the database connection
                 <i class="fas fa-table me-1"></i>
                 Visitor credentials
             </div>
+            
             <div class="card-body table-responsive">
                 <table id="datatablesSimple" class="table table-bordered">
-                    <thead>
+                    <div class="datatable-search">
+                </div>
+              
+                <thead>
                         <tr>
                             <th>Email</th>
                             <th>Name</th>
@@ -394,6 +398,15 @@ $conn->close(); // Close the database connection
     });
 
     
+</script>
+<script>
+$(document).ready(function() {
+    var table = $('#datatablesSimple').DataTable();
+    
+    $('#searchInput').on('keyup', function() {
+        table.search(this.value).draw();
+    });
+});
 </script>
 
 <script>

@@ -142,7 +142,6 @@ $conn->close(); // Close the database connection
             <!-- Navbar Search-->
             <form class="d-none d-md-inline-block form-inline ms-auto me-0 me-md-3 my-2 my-md-0">
                 <div class="input-group">
-                    <button class="btn btn-primary" id="btnNavbarSearch" type="button"><i class="fas fa-search"></i></button>
                 </div>
             </form>
             <!-- Navbar-->
@@ -244,46 +243,7 @@ $conn->close(); // Close the database connection
                         </div>
 
                 
-                        
-                        <div class="card mb-4">
-    <div class="card-header">
-        <i class="fas fa-table me-1"></i>
-        DataTable Example
-    </div>
-    <div class="card-body">
-        <table id="datatablesSimple" class="table table-bordered">
-            <thead>
-                <tr>
-                    <th>Log ID</th>
-                    <th>Email</th>
-                    <th>Date</th>
-                    <th>Time</th>
-                    <th>Purpose</th>
-                </tr>
-            </thead>
-            <tfoot>
-                <tr>
-                    <th>Log ID</th>
-                    <th>Email</th>
-                    <th>Date</th>
-                    <th>Time</th>
-                    <th>Purpose</th>
-                </tr>
-            </tfoot>
-            <tbody>
-                <?php foreach ($data as $row): ?>
-                    <tr>
-                        <td><?php echo $row['logID']; ?></td>
-                        <td><?php echo $row['email']; ?></td>
-                        <td><?php echo $row['Date']; ?></td>
-                        <td><?php echo $row['Time']; ?></td>
-                        <td><?php echo $row['purpose']; ?></td>
-                    </tr>
-                <?php endforeach; ?>
-            </tbody>
-        </table>
-    </div>
-</div>
+
 
 
 
