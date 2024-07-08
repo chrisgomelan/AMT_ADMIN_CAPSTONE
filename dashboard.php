@@ -136,8 +136,11 @@ $conn->close(); // Close the database connection
         <link href="css/styles.css" rel="stylesheet" />
         <link rel="icon" href="assets/img/dost-stii_logo-white.png">
         <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     </head>
     <body class="sb-nav-fixed">
+
         <nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark">
             <!-- Sidebar Toggle-->
             <button class="btn btn-link btn-sm order-1 order-lg-0 me-4 me-lg-0" id="sidebarToggle" href="#!"><i class="fas fa-bars"></i></button>
@@ -145,10 +148,7 @@ $conn->close(); // Close the database connection
             <span class="navbar-brand ps-3 flexi">DOST-STII LIBRARY ATTENDANCE MANAGEMENT SYSTEM ADMIN</span>
             <!-- Navbar Search-->
             <form class="d-none d-md-inline-block form-inline ms-auto me-0 me-md-3 my-2 my-md-0">
-                <div class="input-group">
-                    <input class="form-control" type="text" placeholder="Search for..." aria-label="Search for..." aria-describedby="btnNavbarSearch" />
-                    <button class="btn btn-primary" id="btnNavbarSearch" type="button"><i class="fas fa-search"></i></button>
-                </div>
+                
             </form>
             <!-- Navbar-->
             <ul class="navbar-nav ms-auto ms-md-0 me-3 me-lg-4">
@@ -156,7 +156,7 @@ $conn->close(); // Close the database connection
                     <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="fas fa-user fa-fw"></i></a>
                     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
                       
-                        <li><a class="dropdown-item" href="#!">Logout</a></li>
+                        <li><a class="dropdown-item" href="logout.php">Logout</a></li>
                     </ul>
                 </li>
             </ul>
@@ -207,49 +207,47 @@ $conn->close(); // Close the database connection
                             <input type="date" id="to_date" name="to_date" value="<?php echo isset($_GET['to_date']) ? $_GET['to_date'] : ''; ?>">
 
                             <button type="submit">Generate Report</button>
+
                         </form>
-                        <!-- Area Chart Example -->
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <i class="fas fa-chart-area me-1"></i>
-                        Visits Count (<?php echo $from_date; ?> to <?php echo $to_date; ?>)
-                    </div>
-                    <div class="card-body">
-                        <!-- Area Chart for Visits -->
-                        <canvas id="myAreaChart" width="100%" height="40"></canvas>
-                       
-                    </div>
-                    <div class="col-xl-6">
+                        <button id="generatePDF">Generate PDF</button>
+
                         <div class="card mb-4">
-                            <div class="card-header">
-                                <i class="fas fa-chart-bar me-1"></i>
-                                Gender Count Bar Chart (<?php echo $from_date; ?> to <?php echo $to_date; ?>)
-                            </div>
-                            <div class="card-body">
-                         <canvas id="genderBarChart" width="100%" height="40"></canvas>
-                          </div>            
-                    </div>
-                    <div class="col-xl-6">
-                    <div class="card mb-4">
-                        <div class="card-header">
-                            <i class="fas fa-chart-bar me-1"></i>
-                            Category Count Bar Chart (<?php echo $from_date; ?> to <?php echo $to_date; ?>)
-                        </div>
-                        <div class="card-body">
-                            <canvas id="categoryBarChart" width="100%" height="40"></canvas>
-                        </div>
-                    </div>
-                    <div class="col-xl-6">
-                            <div class="card mb-4">
-                                <div class="card-header">
-                                    <i class="fas fa-chart-bar me-1"></i>
-                                    Peak Hours (<?php echo $from_date; ?> to <?php echo $to_date; ?>)
-                                </div>
-                                <div class="card-body">
-                                    <canvas id="peakHourBarChart" width="100%" height="40"></canvas>
-                                </div>
-                            </div>
-                        </div>
+    <div class="card-header">
+        <i class="fas fa-chart-area me-1"></i>
+        Visits Count (<?php echo $from_date; ?> to <?php echo $to_date; ?>)
+    </div>
+    <div class="card-body">
+        <canvas id="myAreaChart" width="100%" height="40"></canvas>
+    </div>
+</div>
+<div class="card mb-4">
+    <div class="card-header">
+        <i class="fas fa-chart-bar me-1"></i>
+        Gender Count Bar Chart (<?php echo $from_date; ?> to <?php echo $to_date; ?>)
+    </div>
+    <div class="card-body">
+        <canvas id="genderBarChart" width="100%" height="40"></canvas>
+    </div>
+</div>
+<div class="card mb-4">
+    <div class="card-header">
+        <i class="fas fa-chart-bar me-1"></i>
+        Category Count Bar Chart (<?php echo $from_date; ?> to <?php echo $to_date; ?>)
+    </div>
+    <div class="card-body">
+        <canvas id="categoryBarChart" width="100%" height="40"></canvas>
+    </div>
+</div>
+<div class="card mb-4">
+    <div class="card-header">
+        <i class="fas fa-chart-bar me-1"></i>
+        Peak Hours (<?php echo $from_date; ?> to <?php echo $to_date; ?>)
+    </div>
+    <div class="card-body">
+        <canvas id="peakHourBarChart" width="100%" height="40"></canvas>
+    </div>
+</div>
+
 
                 
                         
@@ -459,5 +457,91 @@ var peakHourBarChart = new Chart(ctx, {
     }
 });
 </script>
+<script>
+document.getElementById('generatePDF').addEventListener('click', function() {
+    var { jsPDF } = window.jspdf;
+
+    // Create a new jsPDF instance
+    var doc = new jsPDF();
+
+    // Title
+    doc.setFontSize(16);
+    doc.text('DOST-STII Library Attendance Management System', 10, 10);
+
+    // Capture charts as images and add to PDF
+    html2canvas(document.querySelector("#myAreaChart")).then(canvas => {
+    var imgData = canvas.toDataURL('image/png');
+    doc.addImage(imgData, 'PNG', 10, 20, 180, 60);
+
+    // Add text details for area chart
+    doc.setFontSize(12);
+    doc.text('Visits Count Details:', 10, 90);
+    for (var i = 0; i < chartLabels.length; i++) {
+        var text = chartLabels[i] + ': ' + chartData[i]; // Modify as needed for percentage
+        doc.text(text, 10, 100 + i * 10);
+    }
+    var gender_labels = <?php echo json_encode($gender_labels); ?>;
+    var gender_counts = <?php echo json_encode($gender_counts); ?>;
+
+
+            html2canvas(document.querySelector("#genderBarChart")).then(canvas => {
+            imgData = canvas.toDataURL('image/png');
+            doc.addPage();
+            doc.addImage(imgData, 'PNG', 10, 20, 180, 60);
+
+            // Add text details for gender bar chart
+            doc.setFontSize(12);
+            doc.text('Gender Count Details:', 10, 90);
+            for (var i = 0; i < gender_labels.length; i++) {
+                var text = gender_labels[i] + ': ' + gender_counts[i]; // Modify as needed for percentage
+                doc.text(text, 10, 100 + i * 10);
+            }
+
+
+            html2canvas(document.querySelector("#categoryBarChart")).then(canvas => {
+            imgData = canvas.toDataURL('image/png');
+            doc.addPage();
+            doc.addImage(imgData, 'PNG', 10, 20, 180, 60);
+
+            // Add text details for category bar chart
+            doc.setFontSize(12);
+            doc.text('Category Count Details:', 10, 90);
+            for (var i = 0; i < categoryLabels.length; i++) {
+                var text = categoryLabels[i] + ': ' + categoryCounts[i]; // Modify as needed for percentage
+                doc.text(text, 10, 100 + i * 10);
+            }
+
+                // Capture the next chart
+                html2canvas(document.querySelector("#peakHourBarChart")).then(canvas => {
+                imgData = canvas.toDataURL('image/png');
+                doc.addPage();
+                doc.addImage(imgData, 'PNG', 10, 20, 180, 60);
+
+                // Add text details for peak hour bar chart
+                doc.setFontSize(12);
+                doc.text('Peak Hours Details:', 10, 90);
+                for (var i = 0; i < peakHourLabels.length; i++) {
+                    var text = peakHourLabels[i] + ': ' + peakHourCounts[i]; // Modify as needed for percentage
+                    doc.text(text, 10, 100 + i * 10);
+                }
+   
+
+    // Add text details for peak hour bar chart
+    doc.setFontSize(12);
+    doc.text('Peak Hours Details:', 10, 90);
+    for (var i = 0; i < peakHourLabels.length; i++) {
+        var text = peakHourLabels[i] + ': ' + peakHourCounts[i]; // Modify as needed for percentage
+        doc.text(text, 10, 100 + i * 10);
+    }
+
+                    // Save the PDF
+                    doc.save('chart.pdf');
+                });
+            });
+        });
+    });
+});
+</script>
+
     </body>
 </html>

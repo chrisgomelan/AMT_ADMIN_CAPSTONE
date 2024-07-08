@@ -3733,6 +3733,11 @@ textarea.form-control-lg {
   text-align: center;
 }
 
+button#generatePDF {
+  position: relative;
+  z-index: 10000;
+}
+
 .nav-justified > .nav-link,
 .nav-justified .nav-item {
   flex-basis: 0;
@@ -4266,6 +4271,7 @@ form {
 }
 .card-header:first-child {
   border-radius: var(--bs-card-inner-border-radius) var(--bs-card-inner-border-radius) 0 0;
+  margin-bottom: 1rem;
 }
 
 .card-footer {

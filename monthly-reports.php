@@ -134,6 +134,9 @@ $conn->close(); // Close the database connection
         <link href="css/styles.css" rel="stylesheet" />
         <link rel="icon" href="assets/img/dost-stii_logo-white.png">
         <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
     </head>
     <body class="sb-nav-fixed">
         <nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark">
@@ -144,7 +147,6 @@ $conn->close(); // Close the database connection
             <!-- Navbar Search-->
             <form class="d-none d-md-inline-block form-inline ms-auto me-0 me-md-3 my-2 my-md-0">
                 <div class="input-group">
-                    <input class="form-control" type="text" placeholder="Search for..." aria-label="Search for..." aria-describedby="btnNavbarSearch" />
                     <button class="btn btn-primary" id="btnNavbarSearch" type="button"><i class="fas fa-search"></i></button>
                 </div>
             </form>
@@ -154,7 +156,7 @@ $conn->close(); // Close the database connection
                     <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="fas fa-user fa-fw"></i></a>
                     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
                       
-                        <li><a class="dropdown-item" href="#!">Logout</a></li>
+                    <li><a class="dropdown-item" href="logout.php">Logout</a></li>
                     </ul>
                 </li>
             </ul>
@@ -201,6 +203,7 @@ $conn->close(); // Close the database connection
                             <input type="month" id="date" name="date" value="<?php echo isset($_GET['date']) ? $_GET['date'] : date('Y-m'); ?>">
                             <button type="submit">Generate Report</button>
                         </form>
+                        <button id="generatePDF">Generate PDF</button>
 
 
                         <!-- Area Chart Example -->
@@ -248,87 +251,9 @@ $conn->close(); // Close the database connection
 
                 
                         
-                        <div class="card mb-4">
-    <div class="card-header">
-        <i class="fas fa-table me-1"></i>
-        DataTable Example
-    </div>
-    <div class="card-body">
-        <table id="datatablesSimple" class="table table-bordered">
-            <thead>
-                <tr>
-                    <th>Log ID</th>
-                    <th>Email</th>
-                    <th>Date</th>
-                    <th>Time</th>
-                    <th>Purpose</th>
-                </tr>
-            </thead>
-            <tfoot>
-                <tr>
-                    <th>Log ID</th>
-                    <th>Email</th>
-                    <th>Date</th>
-                    <th>Time</th>
-                    <th>Purpose</th>
-                </tr>
-            </tfoot>
-            <tbody>
-                <?php foreach ($data as $row): ?>
-                    <tr>
-                        <td><?php echo $row['logID']; ?></td>
-                        <td><?php echo $row['email']; ?></td>
-                        <td><?php echo $row['Date']; ?></td>
-                        <td><?php echo $row['Time']; ?></td>
-                        <td><?php echo $row['purpose']; ?></td>
-                    </tr>
-                <?php endforeach; ?>
-            </tbody>
-        </table>
-    </div>
-</div>
 
 
 
-<div class="card mb-4">
-    <div class="card-header">
-        <i class="fas fa-table me-1"></i>
-        Visitor credentials
-    </div>
-    <div class="card-body table-responsive">
-    <table id="datatablesSimple" class="table table-bordered">
-            <thead>
-                <tr>
-                    <th>Email</th>
-                    <th>Name</th>
-                    <th>Middle Name</th>
-                    <th>Surname</th>
-                    <th>Gender</th>
-                    <th>Category</th>
-                    <th>School Institution</th>
-                    <th>Province</th>
-                    <th>City</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php foreach ($visitorChart as $row): ?>
-                    <tr>
-                        <td><?php echo $row['email']; ?></td>
-                        <td><?php echo $row['firstname']; ?></td>
-                        <td><?php echo $row['middlename']; ?></td>
-                        <td><?php echo $row['lastname']; ?></td>
-                        <td><?php echo $row['gender']; ?></td>
-                        <td><?php echo $row['category']; ?></td>
-                        <td><?php echo $row['school_insti']; ?></td>
-                        <td><?php echo $row['province']; ?></td>
-                        <td><?php echo $row['city']; ?></td>
-                    </tr>
-                <?php endforeach; ?>
-            </tbody>
-        </table>
-    </div>
-</div>
-</div>
                 
                 <footer class="py-4 bg-light mt-auto">
                     <div class="container-fluid px-4">
@@ -452,5 +377,89 @@ var peakHourBarChart = new Chart(ctx, {
     }
 });
 </script>
+
+<script>
+document.getElementById('generatePDF').addEventListener('click', function() {
+    var { jsPDF } = window.jspdf;
+    var doc = new jsPDF();
+
+    // Title
+    doc.setFontSize(16);
+    doc.text('DOST-STII Library Attendance Management System', 10, 10);
+    var gender_labels = <?php echo json_encode($gender_labels); ?>;
+    var gender_counts = <?php echo json_encode($gender_counts); ?>;
+    // Example usage of html2canvas to capture the area chart
+    html2canvas(document.querySelector("#myAreaChart")).then(canvas => {
+        var imgDataArea = canvas.toDataURL('image/png');
+        doc.addImage(imgDataArea, 'PNG', 10, 20, 180, 60);
+
+        // Add text details for area chart
+        doc.setFontSize(12);
+        doc.text('Visits Count Details:', 10, 90);
+        for (var i = 0; i < chartLabels.length; i++) {
+            var text = chartLabels[i] + ': ' + chartData[i]; // Modify as needed for percentage
+            doc.text(text, 10, 100 + i * 10);
+        }
+
+        // Example usage for gender count bar chart
+        doc.addPage();
+        doc.setFontSize(16);
+        doc.text('Gender Count', 10, 10);
+        html2canvas(document.querySelector("#genderBarChart")).then(canvas => {
+            var imgDataGender = canvas.toDataURL('image/png');
+            doc.addImage(imgDataGender, 'PNG', 10, 20, 180, 60);
+
+            // Add text details for gender chart
+            doc.setFontSize(12);
+            doc.text('Gender Chart Details:', 10, 90);
+            for (var i = 0; i < gender_labels.length; i++) {
+                var text = gender_labels[i] + ': ' + gender_counts[i]; // Modify as needed
+                doc.text(text, 10, 100 + i * 10);
+            }
+
+            // Example usage for category count bar chart
+            doc.addPage();
+            doc.setFontSize(16);
+            doc.text('Category Count', 10, 10);
+            html2canvas(document.querySelector("#categoryBarChart")).then(canvas => {
+                var imgDataCategory = canvas.toDataURL('image/png');
+                doc.addImage(imgDataCategory, 'PNG', 10, 20, 180, 60);
+
+                // Add text details for category chart
+                doc.setFontSize(12);
+                doc.text('Category Chart Details:', 10, 90);
+                for (var i = 0; i < categoryLabels.length; i++) {
+                    var text = categoryLabels[i] + ': ' + categoryCounts[i]; // Modify as needed
+                    doc.text(text, 10, 100 + i * 10);
+                }
+
+                // Example usage for peak hours bar chart
+                doc.addPage();
+                doc.setFontSize(16);
+                doc.text('Peak Hours', 10, 10);
+                html2canvas(document.querySelector("#peakHourBarChart")).then(canvas => {
+                    var imgDataPeakHours = canvas.toDataURL('image/png');
+                    doc.addImage(imgDataPeakHours, 'PNG', 10, 20, 180, 60);
+
+                    // Add text details for peak hours chart
+                    doc.setFontSize(12);
+                    doc.text('Peak Hours Chart Details:', 10, 90);
+                    for (var i = 0; i < peakHourLabels.length; i++) {
+                        var text = peakHourLabels[i] + ': ' + peakHourCounts[i]; // Modify as needed
+                        doc.text(text, 10, 100 + i * 10);
+                    }
+
+                    // Save the PDF
+                    doc.save('monthly-report.pdf');
+                });
+            });
+        });
+    });
+});
+</script>
+
+
+
+    </script>
     </body>
 </html>
