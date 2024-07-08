@@ -1,10 +1,8 @@
-// chart-setup.js
-
 // Wait for the DOM to be fully loaded before running the chart setup
 document.addEventListener("DOMContentLoaded", function() {
-    // JavaScript chart setup using Chart.js
-    var ctx = document.getElementById('myAreaChart').getContext('2d');
-    var myAreaChart = new Chart(ctx, {
+    // Area Chart setup
+    var ctxArea = document.getElementById('myAreaChart').getContext('2d');
+    var myAreaChart = new Chart(ctxArea, {
         type: 'line',
         data: {
             labels: chartLabels,
@@ -26,4 +24,6 @@ document.addEventListener("DOMContentLoaded", function() {
             }
         }
     });
-});
+
+   
+    });

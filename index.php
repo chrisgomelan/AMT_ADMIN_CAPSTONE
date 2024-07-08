@@ -78,6 +78,29 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $error = "Database connection object is null or not set.";
     }
     
+            // Array to hold gender counts
+        $gender_counts = array(
+            'Male' => 0,
+            'Female' => 0,
+            'Prefer not to say' => 0,
+        );
+
+        // Query to get unique gender counts
+        $sql = "SELECT gender, COUNT(DISTINCT DATE(visit_date), email) AS gender_count
+                FROM visitortbl
+                GROUP BY gender";
+
+        if ($result = $mysqli->query($sql)) {
+            while ($row = $result->fetch_assoc()) {
+                if (isset($gender_counts[$row['gender']])) {
+                    $gender_counts[$row['gender']] = $row['gender_count'];
+                }
+            }
+            $result->free();
+        } else {
+            echo "Error: " . $mysqli->error;
+        }
+
     // Close connection
     $mysqli->close();
 }

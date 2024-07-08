@@ -756,6 +756,7 @@ progress {
 .col-6 {
   flex: 0 0 auto;
   width: 50%;
+
 }
 
 .col-7 {
@@ -1457,7 +1458,12 @@ progress {
   }
   .col-xl-6 {
     flex: 0 0 auto;
-    width: 50%;
+    width: 100%;
+    
+  }
+
+  .visits {
+    height: 30rem;
   }
   .col-xl-6a {
     flex: 0 0 auto;
@@ -3914,6 +3920,13 @@ textarea.form-control-lg {
     transform: none !important;
     transition: none;
   }
+
+form {
+  position: relative;
+  bottom: 1rem;
+}
+}
+
   .navbar-expand-sm .offcanvas .offcanvas-header {
     display: none;
   }
@@ -10932,6 +10945,10 @@ body {
 }
 .sb-nav-fixed #layoutSidenav #layoutSidenav_nav .sb-sidenav .sb-sidenav-menu {
   overflow-y: auto;
+  display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: space-between;
 }
 .sb-nav-fixed #layoutSidenav #layoutSidenav_content {
   padding-left: 225px;

@@ -1,5 +1,4 @@
 <?php
-// Include your connection function or establish connection here
 include 'connections/connect.php';
 $conn = connection(); // Assuming connection() function returns the mysqli connection
 
@@ -10,18 +9,11 @@ if (!isset($_SESSION['email'])) {
     exit();
 }
 
-// Default values for date selection (can be set dynamically based on admin input)
-$from_date = isset($_GET['from_date']) ? $_GET['from_date'] : date('Y-m-d');
-$to_date = isset($_GET['to_date']) ? $_GET['to_date'] : date('Y-m-d');
+// Default value for date selection (use today's date)
+$date_selected = isset($_GET['date']) ? $_GET['date'] : date('Y-m-d');
 
-// Ensure that $to_date does not exceed today's date
-$today_date = date('Y-m-d');
-if (strtotime($to_date) > strtotime($today_date)) {
-    $to_date = $today_date; // Set $to_date to today's date if it exceeds
-}
-
-// Query to fetch data for chart based on selected date range
-$sql = "SELECT Date, COUNT(*) as Count FROM informationlogtbl WHERE Date BETWEEN '$from_date' AND '$to_date' GROUP BY Date";
+// Query to fetch data for chart based on selected date
+$sql = "SELECT Date, COUNT(*) as Count FROM informationlogtbl WHERE Date = '$date_selected' GROUP BY Date";
 $result = $conn->query($sql);
 
 // Initialize arrays to store data for chart
@@ -36,7 +28,7 @@ if ($result->num_rows > 0) {
 }
 
 // Query to fetch data for DataTable
-$sql_table = "SELECT logID, email, Date, Time, purpose FROM informationlogtbl WHERE Date BETWEEN '$from_date' AND '$to_date'";
+$sql_table = "SELECT logID, email, Date, Time, purpose FROM informationlogtbl WHERE Date = '$date_selected'";
 $result_table = $conn->query($sql_table);
 
 // Initialize $data array to store table rows
@@ -46,7 +38,7 @@ if ($result_table->num_rows > 0) {
         $data[] = $row; // Store each row in $data array
     }
 } else {
-    echo "No logs found for the selected date range.";
+    echo "No logs found for the selected date.";
 }
 
 // Query to fetch visitor data
@@ -65,7 +57,7 @@ if ($result_visitor->num_rows > 0) {
 $sql_gender = "SELECT v.gender, COUNT(*) as Count 
                FROM informationlogtbl AS il
                JOIN visitortbl AS v ON il.email = v.email
-               WHERE il.Date BETWEEN '$from_date' AND '$to_date'
+               WHERE il.Date = '$date_selected'
                GROUP BY v.gender";
 
 $result_gender = $conn->query($sql_gender);
@@ -80,11 +72,12 @@ if ($result_gender->num_rows > 0) {
         $gender_counts[] = $row['Count'];
     }
 }
-// Query to fetch category count based on selected date range
+
+// Query to fetch category count based on selected date
 $sql_category = "SELECT v.category, COUNT(*) AS count
                  FROM informationlogtbl AS i
                  INNER JOIN visitortbl AS v ON i.email = v.email
-                 WHERE i.Date BETWEEN '$from_date' AND '$to_date'
+                 WHERE i.Date = '$date_selected'
                  GROUP BY v.category";
 
 $result_category = $conn->query($sql_category);
@@ -99,10 +92,11 @@ if ($result_category->num_rows > 0) {
         $categoryCounts[] = $row['count']; // Count of logs per category for Y-axis
     }
 }
-// Query to fetch peak hour data based on selected date range
+
+// Query to fetch peak hour data based on selected date
 $sql_peak_hours = "SELECT HOUR(Time) AS Hour, COUNT(*) AS Count
                    FROM informationlogtbl
-                   WHERE Date BETWEEN '$from_date' AND '$to_date'
+                   WHERE Date = '$date_selected'
                    GROUP BY HOUR(Time)";
 
 $result_peak_hours = $conn->query($sql_peak_hours);
@@ -118,10 +112,9 @@ if ($result_peak_hours->num_rows > 0) {
     }
 }
 
-
-
 $conn->close(); // Close the database connection
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -165,7 +158,7 @@ $conn->close(); // Close the database connection
             <div id="layoutSidenav_nav">
                 <nav class="sb-sidenav accordion sb-sidenav-dark" id="sidenavAccordion">
                     <div class="sb-sidenav-menu">
-                        <div class="nav">
+                    <div class="nav">
                             <div class="sb-sidenav-menu-heading">Core</div>
                             <a class="nav-link" href="dashboard.php">
                                 <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
@@ -194,25 +187,21 @@ $conn->close(); // Close the database connection
             <div id="layoutSidenav_content">
                 <main>
                     <div class="container-fluid px-4">
-                        <h1 class="mt-4">Dashboard</h1>
+                        <h1 class="mt-4">Daily Reports</h1>
                         <ol class="breadcrumb mb-4">
                             <li class="breadcrumb-item active">Dashboard</li>
                         </ol>
-                       <!-- Date Range Selection Form -->
-                        <form method="GET" onsubmit="validateDateInputs();">
-                            <label for="from_date">From Date:</label>
-                            <input type="date" id="from_date" name="from_date" value="<?php echo isset($_GET['from_date']) ? $_GET['from_date'] : ''; ?>">
-
-                            <label for="to_date">To Date:</label>
-                            <input type="date" id="to_date" name="to_date" value="<?php echo isset($_GET['to_date']) ? $_GET['to_date'] : ''; ?>">
-
+                        <form method="GET">
+                            <label for="date">Select Date:</label>
+                            <input type="date" id="date" name="date" value="<?php echo isset($_GET['date']) ? $_GET['date'] : date('Y-m-d'); ?>">
                             <button type="submit">Generate Report</button>
                         </form>
+
                         <!-- Area Chart Example -->
                 <div class="card mb-4">
                     <div class="card-header">
                         <i class="fas fa-chart-area me-1"></i>
-                        Visits Count (<?php echo $from_date; ?> to <?php echo $to_date; ?>)
+                        Visits Count 
                     </div>
                     <div class="card-body">
                         <!-- Area Chart for Visits -->
@@ -223,7 +212,7 @@ $conn->close(); // Close the database connection
                         <div class="card mb-4">
                             <div class="card-header">
                                 <i class="fas fa-chart-bar me-1"></i>
-                                Gender Count Bar Chart (<?php echo $from_date; ?> to <?php echo $to_date; ?>)
+                                Gender Count Bar Chart 
                             </div>
                             <div class="card-body">
                          <canvas id="genderBarChart" width="100%" height="40"></canvas>
@@ -233,7 +222,7 @@ $conn->close(); // Close the database connection
                     <div class="card mb-4">
                         <div class="card-header">
                             <i class="fas fa-chart-bar me-1"></i>
-                            Category Count Bar Chart (<?php echo $from_date; ?> to <?php echo $to_date; ?>)
+                            Category Count Bar Chart 
                         </div>
                         <div class="card-body">
                             <canvas id="categoryBarChart" width="100%" height="40"></canvas>
@@ -243,7 +232,7 @@ $conn->close(); // Close the database connection
                             <div class="card mb-4">
                                 <div class="card-header">
                                     <i class="fas fa-chart-bar me-1"></i>
-                                    Peak Hours (<?php echo $from_date; ?> to <?php echo $to_date; ?>)
+                                    Peak Hours 
                                 </div>
                                 <div class="card-body">
                                     <canvas id="peakHourBarChart" width="100%" height="40"></canvas>
@@ -256,7 +245,7 @@ $conn->close(); // Close the database connection
                         <div class="card mb-4">
     <div class="card-header">
         <i class="fas fa-table me-1"></i>
-     Information Log 
+        DataTable Example
     </div>
     <div class="card-body">
         <table id="datatablesSimple" class="table table-bordered">
@@ -295,47 +284,45 @@ $conn->close(); // Close the database connection
 
 
 
-<div class="container mt-4">
-        <div class="card mb-4">
-            <div class="card-header">
-                <i class="fas fa-table me-1"></i>
-                Visitor credentials
-            </div>
-            <div class="card-body table-responsive">
-                <table id="datatablesSimple" class="table table-bordered">
-                    <thead>
-                        <tr>
-                            <th>Email</th>
-                            <th>Name</th>
-                            <th>Middle Name</th>
-                            <th>Surname</th>
-                            <th>Gender</th>
-                            <th>Category</th>
-                            <th>School Institution</th>
-                            <th>Province</th>
-                            <th>City</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($visitorChart as $row): ?>
-                            <tr>
-                                <td><?php echo $row['email']; ?></td>
-                                <td><?php echo $row['firstname']; ?></td>
-                                <td><?php echo $row['middlename']; ?></td>
-                                <td><?php echo $row['lastname']; ?></td>
-                                <td><?php echo $row['gender']; ?></td>
-                                <td><?php echo $row['category']; ?></td>
-                                <td><?php echo $row['school_insti']; ?></td>
-                                <td><?php echo $row['province']; ?></td>
-                                <td><?php echo $row['city']; ?></td>
-                            </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
-            </div>
-        </div>
+<div class="card mb-4">
+    <div class="card-header">
+        <i class="fas fa-table me-1"></i>
+        Visitor credentials
     </div>
-
+    <div class="card-body table-responsive">
+    <table id="datatablesSimple" class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Email</th>
+                    <th>Name</th>
+                    <th>Middle Name</th>
+                    <th>Surname</th>
+                    <th>Gender</th>
+                    <th>Category</th>
+                    <th>School Institution</th>
+                    <th>Province</th>
+                    <th>City</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($visitorChart as $row): ?>
+                    <tr>
+                        <td><?php echo $row['email']; ?></td>
+                        <td><?php echo $row['firstname']; ?></td>
+                        <td><?php echo $row['middlename']; ?></td>
+                        <td><?php echo $row['lastname']; ?></td>
+                        <td><?php echo $row['gender']; ?></td>
+                        <td><?php echo $row['category']; ?></td>
+                        <td><?php echo $row['school_insti']; ?></td>
+                        <td><?php echo $row['province']; ?></td>
+                        <td><?php echo $row['city']; ?></td>
+                    </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+    </div>
+</div>
+</div>
                 
                 <footer class="py-4 bg-light mt-auto">
                     <div class="container-fluid px-4">
