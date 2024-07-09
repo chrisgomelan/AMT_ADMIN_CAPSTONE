@@ -20,7 +20,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $password = trim($_POST["password"]);
     
     // Prepare a select statement
-    $sql = "SELECT email, password FROM admintbl WHERE email = ?";
+    $sql = "SELECT email_admin, password_admin FROM admintbl WHERE email_admin = ?";
     
     // Check if $mysqli is set and valid
     if (isset($mysqli) && $mysqli !== null) {
@@ -127,7 +127,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                             <label class="form-check-label" for="inputRememberPassword">Remember Password</label>
                                         </div>
                                         <div class="d-flex align-items-center justify-content-between mt-4 mb-0">
-                                          
                                             <button class="btn btn-primary" type="submit">Login</button>
                                         </div>
                                     </form>
