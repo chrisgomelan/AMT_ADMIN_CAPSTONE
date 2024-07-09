@@ -3576,7 +3576,10 @@ a.paginate_button{
   background-color: #0a53be;
   margin-bottom: 1rem;
 }
-
+button.btn.btn-danger.btn-sm {
+  position: relative;
+  top: 1.5rem;
+}
 #generateReport{
   text-decoration: none;
   border: 1px solid black;
