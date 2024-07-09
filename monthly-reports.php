@@ -42,8 +42,6 @@ if ($result_table->num_rows > 0) {
     while ($row = $result_table->fetch_assoc()) {
         $data[] = $row; // Store each row in $data array
     }
-} else {
-    echo "No logs found for the selected month and year.";
 }
 
 // Query to fetch visitor data
@@ -200,7 +198,7 @@ $conn->close(); // Close the database connection
                         <form method="GET">
                             <label for="date">Select Month and Year:</label>
                             <input type="month" id="date" name="date" value="<?php echo isset($_GET['date']) ? $_GET['date'] : date('Y-m'); ?>">
-                            <button type="submit">Generate Report</button>
+                            <button type="submit" id="generateReport">Generate Report</button>
                         </form>
                         <button id="generatePDF">Generate PDF</button>
 

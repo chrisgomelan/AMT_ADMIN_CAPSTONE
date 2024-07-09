@@ -3556,7 +3556,9 @@ textarea.form-control-lg {
 .btn-group-vertical > .btn.active {
   z-index: 1;
 }
-
+a.paginate_button{
+  margin-right: 1rem;
+}
 .btn-toolbar {
   display: flex;
   flex-wrap: wrap;
@@ -3564,6 +3566,23 @@ textarea.form-control-lg {
 }
 .btn-toolbar .input-group {
   width: auto;
+}
+
+#generatePDF{
+  text-decoration: none;
+  border: 1px solid black;
+  border-radius: 4px;
+  color: white;
+  background-color: #0a53be;
+  margin-bottom: 1rem;
+}
+
+#generateReport{
+  text-decoration: none;
+  border: 1px solid black;
+  border-radius: 4px;
+  color: white;
+  background-color: #13c04d;
 }
 
 .btn-group {

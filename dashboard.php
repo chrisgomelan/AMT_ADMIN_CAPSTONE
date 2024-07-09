@@ -117,7 +117,6 @@ if ($result_peak_hours->num_rows > 0) {
 }
 
 
-
 $conn->close(); // Close the database connection
 ?>
 
@@ -206,7 +205,7 @@ $conn->close(); // Close the database connection
                             <label for="to_date">To Date:</label>
                             <input type="date" id="to_date" name="to_date" value="<?php echo isset($_GET['to_date']) ? $_GET['to_date'] : ''; ?>">
 
-                            <button type="submit">Generate Report</button>
+                            <button type="submit" id="generateReport">Generate Report</button>
 
                         </form>
                         <button id="generatePDF">Generate PDF</button>
@@ -294,49 +293,55 @@ $conn->close(); // Close the database connection
 
 
 <div class="container mt-4">
-        <div class="card mb-4">
-            <div class="card-header">
-                <i class="fas fa-table me-1"></i>
-                Visitor credentials
-            </div>
-            
-            <div class="card-body table-responsive">
-                <table id="datatablesSimple" class="table table-bordered">
-                    <div class="datatable-search">
-                </div>
-              
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-table me-1"></i>
+            Visitor credentials
+        </div>
+        
+        <div class="card-body table-responsive">
+            <table id="datatablesSimple" class="table table-bordered">
                 <thead>
-                        <tr>
-                            <th>Email</th>
-                            <th>Name</th>
-                            <th>Middle Name</th>
-                            <th>Surname</th>
-                            <th>Gender</th>
-                            <th>Category</th>
-                            <th>School Institution</th>
-                            <th>Province</th>
-                            <th>City</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($visitorChart as $row): ?>
-                            <tr>
-                                <td><?php echo $row['email']; ?></td>
-                                <td><?php echo $row['firstname']; ?></td>
-                                <td><?php echo $row['middlename']; ?></td>
-                                <td><?php echo $row['lastname']; ?></td>
-                                <td><?php echo $row['gender']; ?></td>
-                                <td><?php echo $row['category']; ?></td>
-                                <td><?php echo $row['school_insti']; ?></td>
-                                <td><?php echo $row['province']; ?></td>
-                                <td><?php echo $row['city']; ?></td>
-                            </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
-            </div>
+                    <tr>
+                        <th>Email</th>
+                        <th>Name</th>
+                        <th>Middle Name</th>
+                        <th>Surname</th>
+                        <th>Gender</th>
+                        <th>Category</th>
+                        <th>School Institution</th>
+                        <th>Province</th>
+                        <th>City</th>
+                        <th>Action</th> <!-- New column for delete action -->
+                    </tr>
+                </thead>
+                <tbody>
+    <?php foreach ($visitorChart as $row): ?>
+        <tr>
+            <td><?php echo htmlspecialchars($row['email']); ?></td>
+            <td><?php echo htmlspecialchars($row['firstname']); ?></td>
+            <td><?php echo htmlspecialchars($row['middlename']); ?></td>
+            <td><?php echo htmlspecialchars($row['lastname']); ?></td>
+            <td><?php echo htmlspecialchars($row['gender']); ?></td>
+            <td><?php echo htmlspecialchars($row['category']); ?></td>
+            <td><?php echo htmlspecialchars($row['school_insti']); ?></td>
+            <td><?php echo htmlspecialchars($row['province']); ?></td>
+            <td><?php echo htmlspecialchars($row['city']); ?></td>
+            <td>
+                        <form onsubmit="return confirmDeletion('<?php echo htmlspecialchars($row['email']); ?>');" action="delete_visitor.php" method="POST">
+                <input type="hidden" name="email" value="<?php echo htmlspecialchars($row['email']); ?>">
+                <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+            </form>
+
+            </td>
+        </tr>
+    <?php endforeach; ?>
+</tbody>
+
+            </table>
         </div>
     </div>
+</div>
 
                 
                 <footer class="py-4 bg-light mt-auto">
@@ -469,6 +474,34 @@ var peakHourBarChart = new Chart(ctx, {
         }
     }
 });
+</script>
+<script>
+function confirmDeletion(email) {
+    if (confirm('Are you sure you want to delete this visitor?')) {
+        // AJAX request to delete_visitor.php
+        $.ajax({
+            type: "POST",
+            url: "delete_visitor.php",
+            data: { email: email },
+            dataType: "json",
+            success: function(response) {
+                if (response.success) {
+                    alert('Visitor deleted successfully');
+                    // Optionally, you can remove the row from the table or update the UI here
+                    location.reload(); // Reload the page to reflect changes (optional)
+                } else {
+                    alert("Failed to delete visitor: " + response.message);
+                }
+            },
+            error: function(xhr, status, error) {
+                alert("AJAX request failed: " + error);
+            }
+        });
+    }
+    return false; // Prevent the form from submitting
+}
+
+
 </script>
 <script>
 document.getElementById('generatePDF').addEventListener('click', function() {

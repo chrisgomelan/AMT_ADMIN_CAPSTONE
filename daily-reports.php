@@ -37,9 +37,7 @@ if ($result_table->num_rows > 0) {
     while ($row = $result_table->fetch_assoc()) {
         $data[] = $row; // Store each row in $data array
     }
-} else {
-    echo "No logs found for the selected date.";
-}
+} 
 
 // Query to fetch visitor data
 $sql_visitor = "SELECT email, firstname, middlename, lastname, city, province, gender, school_insti, category FROM visitortbl";
@@ -195,7 +193,7 @@ $conn->close(); // Close the database connection
                         <form method="GET">
                             <label for="date">Select Date:</label>
                             <input type="date" id="date" name="date" value="<?php echo isset($_GET['date']) ? $_GET['date'] : date('Y-m-d'); ?>">
-                            <button type="submit">Generate Report</button>
+                            <button type="submit" id="generateReport">Generate Report</button>
                         </form>
                         <button id="generatePDF">Generate PDF</button>
 
