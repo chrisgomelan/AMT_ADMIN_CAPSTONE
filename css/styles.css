@@ -91,6 +91,7 @@
   }
 }
 
+
 body {
   margin: 0;
   font-family: var(--bs-body-font-family);
@@ -126,6 +127,9 @@ h1, .h1 {
   h1, .h1 {
     font-size: 2.5rem;
   }
+}
+svg.svg-inline--fa {
+  height: 1.7rem;
 }
 
 h2, .h2 {

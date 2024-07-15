@@ -72,12 +72,15 @@ $result_gender = $conn->query($sql_gender);
 $gender_labels = [];
 $gender_counts = [];
 
+$total_visits = 0;
 if ($result_gender->num_rows > 0) {
     while ($row = $result_gender->fetch_assoc()) {
         $gender_labels[] = $row['gender'];
         $gender_counts[] = $row['Count'];
+        $total_visits += $row['Count'];
     }
 }
+
 // Query to fetch category count based on selected date range
 $sql_category = "SELECT v.category, COUNT(*) AS count
                  FROM informationlogtbl AS i
@@ -91,12 +94,15 @@ $result_category = $conn->query($sql_category);
 $categoryLabels = [];
 $categoryCounts = [];
 
+$total_categories = 0;
 if ($result_category->num_rows > 0) {
     while ($row = $result_category->fetch_assoc()) {
         $categoryLabels[] = $row['category']; // Category labels for X-axis
         $categoryCounts[] = $row['count']; // Count of logs per category for Y-axis
+        $total_categories += $row['count'];
     }
 }
+
 // Query to fetch peak hour data based on selected date range
 $sql_peak_hours = "SELECT HOUR(Time) AS Hour, COUNT(*) AS Count
                    FROM informationlogtbl
@@ -109,15 +115,17 @@ $result_peak_hours = $conn->query($sql_peak_hours);
 $peak_hour_labels = [];
 $peak_hour_counts = [];
 
+$total_peak_hours = 0;
 if ($result_peak_hours->num_rows > 0) {
     while ($row = $result_peak_hours->fetch_assoc()) {
         $peak_hour_labels[] = $row['Hour'] . ':00'; // Format hour for X-axis labels
         $peak_hour_counts[] = $row['Count']; // Count of logs per hour for Y-axis data
+        $total_peak_hours += $row['Count'];
     }
 }
 
-
 $conn->close(); // Close the database connection
+
 ?>
 
 <!DOCTYPE html>
@@ -209,6 +217,99 @@ $conn->close(); // Close the database connection
 
                         </form>
                         <button id="generatePDF">Generate PDF</button>
+
+   <!-- Count details section -->
+   <div class="row">
+
+<!-- Total Visits -->
+<div class="col-md-3 mb-4">
+    <div class="card bg-primary text-white h-100">
+        <div class="card-body">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h5>Total Visits</h5>
+                    <h1><?php echo $total_visits; ?></h1>
+                </div>
+                <div class="col-md-4">
+                    <i class="fas fa-users fa-3x"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Peak Hours Report - Highest Peak Hour -->
+
+<?php
+// Find the peak hour with the highest count
+$max_peak_hour_count = max($peak_hour_counts);
+$max_peak_hour_index = array_search($max_peak_hour_count, $peak_hour_counts);
+$highest_peak_hour = $peak_hour_labels[$max_peak_hour_index];
+?>
+
+<div class="col-md-3 mb-4">
+    <div class="card bg-warning text-white h-100">
+        <div class="card-body">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h5>Peak Hour</h5>
+                    <h1><?php echo htmlspecialchars($highest_peak_hour); ?></h1>
+                    <p>Count: <?php echo $max_peak_hour_count; ?></p>
+                </div>
+                <div class="col-md-4">
+                    <i class="fas fa-clock fa-3x"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Total Categories -->
+<?php foreach ($categoryLabels as $index => $categoryName): ?>
+    <div class="col-md-3 mb-4">
+        <div class="card bg-success text-white h-100">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h5>Category:</h5>
+                        <h6><?php echo htmlspecialchars($categoryName); ?></h6>
+                        <h1><?php echo $categoryCounts[$index]; ?></h1>
+                    </div>
+                    <div class="col-md-4">
+                        <i class="fas fa-layer-group fa-3x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+<?php endforeach; ?>
+<!-- Gender Reports -->
+<?php foreach ($gender_labels as $index => $gender): ?>
+    <div class="col-md-3 mb-4">
+        <div class="card bg-info text-white h-100">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h4>Gender:</h4>
+                        <h6><?php echo htmlspecialchars($gender); ?></h6>
+                        <h1><?php echo $gender_counts[$index]; ?></h1>
+                    </div>
+                    <div class="col-md-4">
+                        <i class="fas fa-venus-mars fa-3x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+<?php endforeach; ?>
+
+
+
+<!-- Add more count details cards as needed -->
+
+</div>
+</div>
 
                         <div class="card mb-4">
     <div class="card-header">
